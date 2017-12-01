@@ -75,7 +75,7 @@ if [[ $devc == 4 ]];then
 	echo "您即将部署ss-panel，整个过程时间较长，并且存在风险,请保证你的系统纯净"
 	echo "为避免意外断线导致安装中断，推荐在screen中运行"
 	echo "安装脚本非本人所写，来源：https://github.com/mmmwhy/ss-panel-and-ss-py-mu/blob/master/ss-panel-v3-mod.sh"
-	echo "默认账号：ss@feiyang.li    默认密码：feiyang"
+	echo "默认账号：91vps    默认密码：91vps"
 	echo -e "在下面输入\e[31;49m $rsum \e[0m表示您已知晓风险并同意安装，输入其它内容将退出安装！"
 	read -n 6 -p "请输入： " choise
 	if [[ $choise == $rsum ]];then
