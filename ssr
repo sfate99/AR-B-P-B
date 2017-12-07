@@ -19,6 +19,14 @@ if [[ -z $PID ]];then
 		nohup bash /usr/local/SSR-Bash-Python/servercheck.sh run 2>/dev/null &
 	fi
 fi
+
+#Check log
+log_max=$((10*1024))
+log_filesize=$(du /usr/local/shadowsocksr/ssserver.log | awk -F' ' '{ print $1 }')
+if [[ ${log_filesize} -ge ${log_max} ]];then
+    sed -i -n '1,198N;$p;N;D' /usr/local/shadowsocksr/ssserver.log
+fi
+
 echo
 echo "*******************"
 echo ""
