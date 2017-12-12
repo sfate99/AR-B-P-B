@@ -21,10 +21,12 @@ if [[ -z $PID ]];then
 fi
 
 #Check log
+if [[ -e /usr/local/shadowsocksr/ssserver.log ]];then
 log_max=$((10*1024))
 log_filesize=$(du /usr/local/shadowsocksr/ssserver.log | awk -F' ' '{ print $1 }')
 if [[ ${log_filesize} -ge ${log_max} ]];then
     sed -i -n '1,198N;$p;N;D' /usr/local/shadowsocksr/ssserver.log
+fi
 fi
 
 echo
