@@ -1,5 +1,16 @@
 #!/bin/bash
-export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+#Set PATH
+unset check
+for i in `echo $PATH | sed 's/:/\n/g'`
+do
+        if [[ ${i} == "/usr/local/bin" ]];then
+                check="yes"
+        fi
+done
+if [[ -z ${check} ]];then
+        echo "export PATH=${PATH}:/usr/local/bin" >> ~/.bashrc
+        . ~/.bashrc
+fi
 
 #Check Root
 [ $(id -u) != "0" ] && { echo "Error: You must be root to run this script"; exit 1; }
@@ -30,6 +41,27 @@ else
     kill -9 $$
 fi
 
+StopInstall(){
+    echo -e "\n安装中断,开始清理文件!"
+    sleep 1s
+    rm -rf /usr/local/bin/ssr
+    rm -rf /usr/local/SSR-Bash-Python
+    rm -rf /usr/local/shadowsocksr
+    rm -rf ${PWD}/libsodium*
+    rm -rf /etc/init.d/ssr-bash-python
+    rm -rf /usr/local/AR-B-P-B
+    if [[ ${OS} == CentOS  ]];then
+        sed -n -i 's#/etc/init.d/ssr-bash-python#d' /etc/rc.d/rc.local
+    fi
+    if [[ ${OS} == CentOS && ${CentOS_RHEL_version} == 7  ]];then
+        systemctl stop iptables.service
+        systemctl restart firewalld.service
+        systemctl disable iptables.service
+        systemctl enable firewalld.service
+    fi
+    rm -rf $0
+    echo "清理完成!"
+}
 
 #Get Current Directory
 workdir=$(pwd)
@@ -41,6 +73,7 @@ if [[ $1 == "uninstall" ]];then
 	exit 1
 fi
 echo "开始部署"
+trap 'StopInstall 2>/dev/null && exit 0' 2
 sleep 2s
 if [[ ${OS} == Ubuntu ]];then
 	apt-get update
@@ -67,12 +100,21 @@ if [[ ${OS} == Debian ]];then
 	apt-get -y install bc vnstat
     apt-get install build-essential -y
 fi
+if [[ $? != 0 ]];then
+    echo "安装失败，请稍候重试！"
+    exit 1 
+fi
 #Install Libsodium
-libsodiumfile="/usr/local/lib/libsodium.so"
-if [[ ! -e ${libsodiumfile} ]];then
+libsodiumfilea="/usr/local/lib/libsodium.so"
+libsodiumfileb="/usr/lib/libsodium.so"
+if [[ -e ${libsodiumfilea} ]];then
+    echo "libsodium已安装!"
+elif [[ -e ${libsodiumfileb} ]];then
+    echo "libsodium已安装!"
+else
     cd $workdir
-    export LIBSODIUM_VER=1.0.13
-    wget -q https://github.com/jedisct1/libsodium/releases/download/1.0.13/libsodium-$LIBSODIUM_VER.tar.gz
+    export LIBSODIUM_VER=1.0.15
+    wget -q https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VER}/libsodium-$LIBSODIUM_VER.tar.gz
     tar xvf libsodium-$LIBSODIUM_VER.tar.gz
     pushd libsodium-$LIBSODIUM_VER
     ./configure --prefix=/usr && make
@@ -84,13 +126,11 @@ if [[ ! -e ${libsodiumfile} ]];then
 #    	echo "libsodium安装失败 !"
 #    	exit 1
 #    fi
-else
-    echo "libsodium已安装!"
 fi
 cd /usr/local
 git clone https://github.com/Readour/shadowsocksr.git
 cd ./shadowsocksr
-git manyuser
+git checkout manyuser
 git pull
 if [ $1 == "develop" ];then
     git checkout stack/dev
@@ -114,6 +154,25 @@ if [ -e /usr/local/bin/ssr ];then
 		echo "卸载完成!!"
 		exit 0
 	fi
+    if [[ ! $yn == n ]];then
+        echo "你是否为其它版本迁移而来？（Y/N）"
+        read -t 2 -n 1 yn
+    fi
+    if [[ ${yn} == [yY] ]];then
+        mv /usr/local/shadowsocksr/mudb.json /usr/local/mudb.json
+        rm -rf /usr/local/shadowsocksr
+        cd /usr/local
+        git clone https://github.com/Readour/shadowsocksr.git
+        if [[ $1 == develop ]];then
+            cd ./shadowsocksr
+            git checkout stack/dev
+            rm -f ./mudb.json
+            mv ../mudb.json ./mudb.json
+        else
+            rm -f ./shadowsocksr/mudb.json
+            mv /usr/local/mudb.json /usr/local/shadowsocksr/mudb.json
+        fi
+    fi
 	echo "开始更新"
 	sleep 1s
 	echo "正在清理老版本"
@@ -128,6 +187,12 @@ if [ -e /usr/local/bin/ssr ];then
     fi
 fi
 if [[ -d /usr/local/SSR-Bash-Python ]];then
+    if [[ $yn == [yY] ]];then
+        rm -rf /usr/local/SSR-Bash-Python
+        cd /usr/local
+        git clone https://github.com/Readour/AR-B-P-B.git
+        mv AR-B-P-B SSR-Bash-Python
+    fi
     cd /usr/local/SSR-Bash-Python
     git checkout master
     git pull
@@ -156,6 +221,8 @@ if [[ ! -e /usr/bin/bc ]];then
 		apt-get install bc -y
 	fi
 fi
+if [[ ! -e /usr/local/bin/ssr ]]; then
+
 #Start when boot
 if [[ ${OS} == Ubuntu || ${OS} == Debian ]];then
     cat >/etc/init.d/ssr-bash-python <<EOF
@@ -193,7 +260,6 @@ fi
 #Change CentOS7 Firewall
 if [[ ${OS} == CentOS && $CentOS_RHEL_version == 7 ]];then
     systemctl stop firewalld.service
-    systemctl disable firewalld.service
     yum install iptables-services -y
     cat << EOF > /etc/sysconfig/iptables
 # sample configuration for iptables service
@@ -213,10 +279,11 @@ if [[ ${OS} == CentOS && $CentOS_RHEL_version == 7 ]];then
 -A FORWARD -j REJECT --reject-with icmp-host-prohibited
 COMMIT
 EOF
-systemctl restart iptables.service
-systemctl enable iptables.service
+    systemctl restart iptables.service
+    systemctl enable iptables.service
+    systemctl disable firewalld.service
 fi
-
+fi
 #Install SSR-Bash Background
 if [[ $1 == "develop" ]];then
 	wget -q -N --no-check-certificate -O /usr/local/bin/ssr https://raw.githubusercontent.com/readour/AR-B-P-B/develop/ssr
@@ -231,7 +298,10 @@ sed -i "s/sspanelv2/mudbjson/g" /usr/local/shadowsocksr/userapiconfig.py
 sed -i "s/UPDATE_TIME = 60/UPDATE_TIME = 10/g" /usr/local/shadowsocksr/userapiconfig.py
 sed -i "s/SERVER_PUB_ADDR = '127.0.0.1'/SERVER_PUB_ADDR = '$(wget -qO- -t1 -T2 ipinfo.io/ip)'/" /usr/local/shadowsocksr/userapiconfig.py
 #INstall Success
-read -t 15 -p "输入与您主机绑定的域名(请在15秒内输入，超时将跳过本步骤): " ipname
+read -t 20 -p "输入与您主机绑定的域名(请在20秒内输入，超时将跳过本步骤.默认填入本机IP): " ipname
+if [[ -z ${ipname} ]];then
+    ipname=$(wget -qO- -t1 -T2 ipinfo.io/ip)
+fi
 echo "$ipname" > /usr/local/shadowsocksr/myip.txt
 if [[ $1 == develop ]];then
     if [[ -e /usr/local/SSR-Bash-Python/check.log ]];then
@@ -260,8 +330,20 @@ if [[ $1 == develop ]];then
         fi
     fi
 fi
+if [[ -e /etc/sysconfig/iptables-config ]];then
+        ipconf=$(cat /etc/sysconfig/iptables-config | grep 'IPTABLES_MODULES_UNLOAD="no"')
+        if [[ -z ${ipconf} ]];then
+                sed -i 's/IPTABLES_MODULES_UNLOAD="yes"/IPTABLES_MODULES_UNLOAD="no"/g' /etc/sysconfig/iptables-config
+                echo "安装完成，准备重启"
+                sleep 3s
+                reboot
+        fi
+fi
 bash /usr/local/SSR-Bash-Python/self-check.sh
 echo '安装完成！输入 ssr 即可使用本程序~'
+if [[ ${check} != "yes" ]] ;then
+        echo "如果你执行 ssr 提示找不到命令，请尝试退出并重新登录来解决"
+fi
 echo '原作者已经停止本脚本更新，此版本为作者删除项目前最后一个版本魔改而来'
 echo '不喜勿喷!'
 echo '谨慎使用！仅供研究！'
