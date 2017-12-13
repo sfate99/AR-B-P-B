@@ -335,5 +335,6 @@ if [[ $devc == 8 ]];then
 fi
 if [[ $devc == 9  ]];then
     AutoIptables
+    bash /usr/local/SSR-Bash-Python/dev.sh
+    exit 0
 fi
-exit 0
