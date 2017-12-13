@@ -136,9 +136,9 @@ fi
 iptables -A INPUT  -j LOG --log-prefix "drop: "
 iptables -A INPUT  -j DROP
 trap 'finailize && exit 0' 2 # Ctrl-C をトラップする
-echo "In 30 seconds iptables will be automatically reset."
-echo "Don't forget to test new SSH connection!"
-echo "If there is no problem then press Ctrl-C to finish."
+echo "在30秒内，iptables配置将被自动重置。"
+echo "请尝试建立新的SSH连接测试！"
+echo "如果没有问题，请按Ctrl-C完成配置。"
 sleep 30
 echo "rollback..."
 initialize
