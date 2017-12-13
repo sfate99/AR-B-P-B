@@ -31,6 +31,40 @@ fi
 #Check Root
 [ $(id -u) != "0" ] && { echo "Error: You must be root to run this script"; exit 1; }
 
+AutoIptables(){
+    rsum=`date +%s%N | md5sum | head -c 6`
+    echo "使用前请注意，该功能会重置防火墙配置，已有连接可能会被中断。"
+    echo -e "在下面输入\e[31;49m $rsum \e[0m表示您已知晓风险并同意继续"
+    read -n 6 readsum
+    if [[ ${readsum} == ${rsum} ]];then
+        netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq >> ./port.conf
+        bash /usr/local/SSR-Bash-Python/iptables2.sh
+        if [[ ${OS} =~ ^Ubuntu$|^Debian$  ]];then
+            iptables-restore < /etc/iptables.up.rules
+            for port in `cat ./port.conf`; do iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $port -j ACCEPT ; done
+            for port in `cat ./port.conf`; do iptables -I INPUT -m state --state NEW -m udp -p udp --dport $port -j ACCEPT ; done
+            iptables-save > /etc/iptables.up.rules
+        fi
+        if [[ ${OS} == CentOS  ]];then
+           if [[ $CentOS_RHEL_version == 7  ]];then
+               iptables-restore < /etc/iptables.up.rules
+               for port in `cat ./port.conf`; do iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $port -j ACCEPT ; done
+               for port in `cat ./port.conf`; do iptables -I INPUT -m state --state NEW -m udp -p udp --dport $port -j ACCEPT ; done
+               iptables-save > /etc/iptables.up.rules
+           else
+               for port in `cat ./port.conf`; do iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $port -j ACCEPT ; done 
+               for port in `cat ./port.conf`; do iptables -I INPUT -m state --state NEW -m udp -p udp --dport $port -j ACCEPT ; done
+               /etc/init.d/iptables save
+               /etc/init.d/iptables restart
+           fi
+        fi
+        rm -f ./port.conf
+    else
+        echo "输入错误，退出!"
+        bash /usr/local/SSR-Bash-Python/dev.sh
+        exit 0
+    fi
+}
 echo "测试区域，请勿随意使用"
 echo "1.更新SSR-Bsah"
 echo "2.一键封禁BT下载，SPAM邮件流量（无法撤销）"
@@ -40,10 +74,11 @@ echo "5.BBR 控制台"
 echo "6.锐速 控制台"
 echo "7.LotServer 控制台"
 echo "8.UML-LKL(OpenVZ-BBR)安装"
+echo "9.防火墙增强配置（有风险）"
 while :; do echo
 	read -p "请选择： " devc
 	[ -z "$devc" ] && ssr && break
-	if [[ ! $devc =~ ^[1-8]$ ]]; then
+	if [[ ! $devc =~ ^[1-9]$ ]]; then
 		echo "输入错误! 请输入正确的数字!"
 	else
 		break	
@@ -87,7 +122,7 @@ if [[ $devc == 4 ]];then
 	fi
 fi
 bbrcheck(){
-cd /usr/local/SSR-Bash-Python
+cd /usr/loca/SSR-Bash-Python
 #GitHub:https://github.com/ToyoDAdoubi
 if [[ ! -e bbr.sh ]]; then
 	echo "没有发现 BBR脚本，开始下载..."
@@ -298,3 +333,7 @@ if [[ $devc == 8 ]];then
 		wget -q -N --no-check-certificate https://raw.githubusercontent.com/Huiaini/UML-LKL/master/uml.sh && bash uml.sh
 	fi
 fi
+if [[ $devc == 9  ]];then
+    AutoIptables
+fi
+exit 0
