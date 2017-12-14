@@ -50,13 +50,6 @@ initialize()
 	iptables -P OUTPUT  ACCEPT
 	iptables -P FORWARD ACCEPT
 }
-finailize()
-{
-	/etc/init.d/iptables save && # 設定の保存
-	/etc/init.d/iptables restart && # 保存したもので再起動してみる
-	return 0
-	return 1
-}
 setiptables(){
 initialize
 iptables -P INPUT   DROP 
@@ -179,15 +172,15 @@ if [[ ${OS} == CentOS ]];then
 		/etc/init.d/iptables restart
 	fi
 fi
-echo "在30秒内，iptables配置将被自动重置。"
+echo -e "\n在一分钟内，iptables配置将被自动重置。"
 echo "请尝试建立新的SSH连接测试！"
 echo "如果没有问题，请输入jdkskq完成配置，输入其它值也将重置。"
-read -n 6 -t 30 rsum
+read -n 6 -t 60 rsum
 if [[ ${rsum} == jdkskq ]];then
-    echo "配置已生效"
+    echo -e "\n配置已生效"
     exit 0
 else
-echo "rollback..."
+echo -e "\n回滚..."
 if [[ ${OS} =~ ^Ubuntu$|^Debian$ ]];then
 	iptables-restore < /etc/iptables.up.rules
         initialize
