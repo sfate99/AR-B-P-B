@@ -35,7 +35,7 @@ AutoIptables(){
     rsum=`date +%s%N | md5sum | head -c 6`
     echo "使用前请注意，该功能会重置防火墙配置，已有连接可能会被中断。"
     echo -e "在下面输入\e[31;49m $rsum \e[0m表示您已知晓风险并同意继续"
-    read -n 6 readsum
+    read readsum
     if [[ ${readsum} == ${rsum} ]];then
         netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq >> ./port.conf
         bash /usr/local/SSR-Bash-Python/iptables2.sh
