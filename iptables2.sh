@@ -29,7 +29,7 @@ echo "Does not support this OS, Please contact the author! "
 kill -9 $$
 fi
 #定义变量
-SSH=22
+SSH=$(netstat -nlp | grep sshd | awk '{print $4}' | awk -F : '{print $NF}' | sort -n | uniq)
 FTP=20,21
 DNS=53
 SMTP=25,465,587
