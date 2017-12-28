@@ -97,11 +97,12 @@ if [[ "$sv" == "$solve" ]];then
         cd /usr/local/SSR-Bash-Python/Explorer 
         if [[ ! -e /bin/usleep  ]];then
             gcc -o /bin/usleep ./usleep.c
-            chmod +x ./*
         fi
         read -p "未发现备份文件或者存在多个备份文件，请手动选择（按Y键将打开一个文件管理器）" yn
         if [[ ${yn} == [Yy] ]];then
+            chmod +x /usr/local/SSR-Bash-Python/Explorer/*
             bash ./Explorer.sh "${HOME}/backup"
+	    chmod -x /usr/local/SSR-Bash-Python/Explorer/*
             bakfile=$(cat /tmp/BakFilename.tmp)
             if [[ ! -e ${bakfile} ]];then
                 echo "无效!"
