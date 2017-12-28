@@ -113,8 +113,8 @@ if [[ "$sv" == "$solve" ]];then
 		bakfile=${HOME}/backup/ssr-conf.tar.gz 
 	fi
 	if [[ -e ${bakfile} ]];then
-        cd ${HOME}
-		tar -zxvf ${bakfile}
+        cd ${HOME}/backup
+		tar -zxvf ${bakfile} -C ./
 		if [[ -e ./check.log ]];then
 			mv ./check.log /usr/local/SSR-Bash-Python/check.log
 		fi
