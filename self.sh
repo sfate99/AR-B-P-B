@@ -92,7 +92,7 @@ mkdir -p ${HOME}/backup
 echo "这将会导致你现有的配置被覆盖"
 sumdc
 if [[ "$sv" == "$solve" ]];then
-    bakf=$(ls ${HOME}/bakup | wc -l)
+    bakf=$(ls ${HOME}/backup | wc -l)
     if [[ ${bakf} != 1 ]];then
         cd /usr/local/SSR-Bash-Python/Explorer 
         if [[ ! -e /bin/usleep  ]];then
