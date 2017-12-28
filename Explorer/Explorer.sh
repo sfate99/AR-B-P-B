@@ -2,7 +2,7 @@
 
 #变量
 #app='/opt/QtPalmtop/bin/z'
-app="$PWD/"
+app="$PWD"
 listfile='/tmp/ListSelect.tmp' ; null='/dev/null'
 recycle="$PWD/Recycle"
 outfile='/tmp/DirFile.tmp' ; lstmp='/tmp/ls.tmp'
