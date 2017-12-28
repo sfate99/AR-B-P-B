@@ -2,11 +2,11 @@
 
 #变量
 #app='/opt/QtPalmtop/bin/z'
-app="$PWD/bin/z"
+app="$PWD/"
 listfile='/tmp/ListSelect.tmp' ; null='/dev/null'
 recycle="$PWD/Recycle"
 outfile='/tmp/DirFile.tmp' ; lstmp='/tmp/ls.tmp'
-optbin='/opt/QtPalmtop/bin'
+#optbin='/opt/QtPalmtop/bin'
 declare -a dir style click clickterms \
 title=('文件管理' '打开文件' '选择文件' '保存文件') bak \
 clickbak clickmsg=('选择此项' '取消选择') \
