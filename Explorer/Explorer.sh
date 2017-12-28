@@ -291,6 +291,7 @@ power=1 ; open=0
 
 #主程序
 stty -echo ; stty erase '^?' ; cd "$initdir"
+trap 'echo -e "\033[?25h" ; stty echo ; exit 0' 2
 until [ "$quit" = 1 ] ; do
   prog_find ; select="$(($(<$listfile)+1))"
   case "$select" in
@@ -310,4 +311,4 @@ until [ "$quit" = 1 ] ; do
     esac ;;
   esac
 done
-echo $result > $outfile ; stty echo ; exit 0
+echo $result > $outfile ; echo -e "\033[?25h" ; stty echo ; exit 0
