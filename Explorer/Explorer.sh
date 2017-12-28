@@ -107,6 +107,10 @@ prog_file(){
   pwd="$PWD/${dir[select]}" ; tmp="$1"
   if [ "$tmp" = 2 ] ; then tmp=0 ; fi
   echo -ne "${linkp[$1]}$3$end"
+  if [ $1 = 2 ] ; then
+    $app/Msgbox.sh "$xy" "配置文件" "还原配置 取消"
+    if [ $? = 0 ] ; then echo "${dir[select]}" > /tmp/BakFilename.tmp ; echo -e "\033[?25h" ; stty echo ； exit 0 ; fi 
+  fi
   $app/Msgbox.sh "$xy" "$2"\
   "'${clickmsg[click[select]]}' '运行...' ${linkshow[$1]} ${tar[$1]} '挂载/链接' ' 重命名' '删除...' '返回'"
   case "$?" in
@@ -271,9 +275,7 @@ prog_mount_to(){
   mount "$mount" "${dir[select]}"
   echo -e "$inc挂载${ok[$?]}!$end"
 }
-prog_unpick(){
-  $app/Msgbox.sh "$xy" "配置文件" "还原配置 解压文件 取消"
-  if [ $? = 0 ] ; then echo "${dir[select]}" > /tmp/BakFilename.tmp ; echo -e "\033[?25h" ; stty echo ； exit 0 ; elif [ $? = 2 ] ; then return ; fi 
+prog_unpick(){ 
   $app/Msgbox.sh "$xy" "解压文件"\
   "解压到当前目录 解压到家目录  解压到根目录 取消"
   case $? in
