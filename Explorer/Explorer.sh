@@ -66,12 +66,7 @@ prog_msgbox_dirmenu(){
   esac
 }
 prog_msgbox_run(){
-  $app/Msgbox.sh "$xy" "运行命令"\
-  "英文命令 中文命令 取消"
-  case "$?" in
-  0 ) $app/Terminal.sh "EN" ;;
-  1 ) $app/Terminal.sh "CH" ;;
-  esac
+  echo -e "$inc此功能未完成!$end"
 }
 prog_msgbox_new(){
   $app/Msgbox.sh "$xy" "'新建文件(夹)'"\
@@ -89,7 +84,7 @@ prog_link_make(){
   echo -e "$inc链接创建${ok[$?]}!$end"
 }
 prog_input(){
-  echo -e "\E[1m$inc$1 请输入名称: (擦除中文字符时会出问题)$end"
+  echo -e "\E[1m$inc$1 请输入名称: $end"
   read -r read
 }
 prog_paste(){
@@ -129,35 +124,21 @@ prog_file(){
 }
 prog_file_open(){
   $app/Msgbox.sh "$xy" "打开文件 请选择打开方式:"\
-  "'诺亚书苑' '我的相册' '网络游览' '编程天地' '  返回  '"
+  "'备份还原' '  Vim  ' 'MPlayer' '  返回  '"
   tmp=$?
-  if [ "$tmp" = 4 ] ; then return ; fi
-  echo -e "$inc不要最小化,最小化后无法恢复!$end"
+  if [ "$tmp" = 3 ] ; then return ; fi
   case $tmp in
-  0 ) "$optbin/ebook" "$PWD/${dir[select]}" ;;
-  1 ) "$optbin/photo" "$PWD/${dir[select]}" ;;
-  2 ) "$optbin/konqueror" "$PWD/${dir[select]}" ;;
-  3 ) prog_file_edit ;;
+  0 ) echo "$PWD/${dir[select]}" > /tmp/BakFilename.tmp ;;
+  1 ) vim "$PWD/${dir[select]}" ;;
+  2 ) mplayer "$PWD/${dir[select]}" ;;
   esac
 }
 prog_file_msgbox_run(){
   $app/Msgbox.sh "$xy" "运行文件"\
-  "在此终端运行 'qcop外部运行' 取消"
+  "在此终端运行 取消"
   case "$?" in
   0 ) (${dir[select]}) ;;
-  1 ) /opt/QtPalmtop/bin/qcop "QPE/System"\
-  "xxExecute(QString)" "$pwd" ;;
   esac
-}
-prog_file_edit(){
-  edit=0 ; ln -sn "${dir[select]}" "${dir[select]}.c"
-  if [ $? != 0 ] ; then
-    cp "${dir[select]}" "${dir[select]}.c" ; edit=1
-  fi
-  /opt/QtPalmtop/bin/programSalon "${dir[select]}.c"
-  if [ $edit = 1 ] ; then mv "${dir[select]}.c" "${dir[select]}"
-  else rm "${dir[select]}.c"
-  fi
 }
 prog_mount(){
   mount="$pwd"
@@ -292,13 +273,12 @@ prog_mount_to(){
 }
 prog_unpick(){
   $app/Msgbox.sh "$xy" "解压文件"\
-  "解压到当前目录 解压到本地磁盘 解压到存储卡 解压到根目录 取消"
+  "解压到当前目录 解压到家目录  解压到根目录 取消"
   case $? in
   0 ) tardir="$PWD" ;;
-  1 ) tardir="/mnt/UsrDisk" ;;
-  2 ) tardir="/mnt/mmc" ;;
-  3 ) tardir="/" ;;
-  4 ) return ;;
+  1 ) tardir="$HOME" ;;
+  2 ) tardir="/" ;;
+  3 ) return ;;
   esac
   tar -xzvf "${dir[select]}" -C "$tardir"
   echo -e "$inc解压${ok[$?]}$end"
