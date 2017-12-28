@@ -150,6 +150,7 @@ if [[ "$sv" == "$solve" ]];then
 		else
 			echo "配置未生效，还原失败，请联系作者解决"
 		fi
+		rm /tmp/BakFilename.tmp
 	else
 		echo "备份文件不存在，请检查！"
 	fi
