@@ -88,16 +88,32 @@ backup(){
 	fi
 }
 recover(){
+mkdir -p ${HOME}/backup 
 echo "这将会导致你现有的配置被覆盖"
 sumdc
 if [[ "$sv" == "$solve" ]];then
-	read -p "请输入备份文件的绝对路径(默认位于${HOME}/backup)：" bakfile
+    bakf=$(ls ${HOME}/bakup | wc -l)
+    if [[ ${bakf} != 1 ]];then
+        cd /usr/local/SSR-Bash-Python/Explorer 
+        if [[ ! -e /bin/usleep  ]];then
+            gcc -o /bin/usleep ./usleep.c
+            chmod +x ./*
+        fi
+        read -p "未发现备份文件或者存在多个备份文件，请手动选择（按Y键将打开一个文件管理器）" yn
+        if [[ ${yn} == [Yy] ]];then
+            bash ./Explorer.sh "${HOME}/backup"
+            bakfile=$(cat /tmp/BakFilename.tmp)
+            if [[ ! -e ${bakfile} ]];then
+                echo "无效!"
+            fi
+        fi
+    fi
 	if [[ -z ${bakfile} ]];then
-		bakfile=${HOME}/backup
+		bakfile=${HOME}/backup/ssr-conf.tar.gz 
 	fi
-	if [[ -e ${bakfile}/ssr-conf.tar.gz ]];then
-		cd $bakfile
-		tar -zxvf ./ssr-conf.tar.gz
+	if [[ -e ${bakfile} ]];then
+        cd ${HOME}
+		tar -zxvf ${bakfile}
 		if [[ -e ./check.log ]];then
 			mv ./check.log /usr/local/SSR-Bash-Python/check.log
 		fi
