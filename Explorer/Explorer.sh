@@ -109,7 +109,7 @@ prog_file(){
   echo -ne "${linkp[$1]}$3$end"
   if [ $1 = 2 ] ; then
     $app/Msgbox.sh "$xy" "配置文件" "还原配置 取消"
-    if [ $? = 0 ] ; then echo "${dir[select]}" > /tmp/BakFilename.tmp ; echo -e "\033[?25h" ; stty echo ； exit 0 ; fi 
+    if [ $? = 0 ] ; then echo "${dir[select]}" > /tmp/BakFilename.tmp ; echo -e "\033[?25h" ; stty echo ； break ； exit 0 ; fi 
   fi
   $app/Msgbox.sh "$xy" "$2"\
   "'${clickmsg[click[select]]}' '运行...' ${linkshow[$1]} ${tar[$1]} '挂载/链接' ' 重命名' '删除...' '返回'"
