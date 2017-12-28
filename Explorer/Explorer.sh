@@ -236,11 +236,11 @@ prog_multidelete(){
 }
 prog_pickup(){
   $app/Msgbox.sh "$xy" "'创建.tar.gz压缩文件' '已选择$clicknum项'"\
-  "'压缩到当前目录' '压缩到本地磁盘' '压缩到存储卡' '取消'"
+  "'压缩到当前目录' '压缩到家目录' '压缩到根目录' '取消'"
   case $? in
   0 ) tardir="$PWD" ;;
-  1 ) tardir="/mnt/UsrDisk" ;;
-  2 ) tardir="/mnt/mmc" ;;
+  1 ) tardir="$HOME" ;;
+  2 ) tardir="/" ;;
   3 ) return ;;
   esac
   prog_input "文件打包"
@@ -272,6 +272,8 @@ prog_mount_to(){
   echo -e "$inc挂载${ok[$?]}!$end"
 }
 prog_unpick(){
+  $app/Msgbox.sh "$xy" "配置文件" "还原配置 解压文件 取消"
+  if [ $? = 0 ] ; then echo "${dir[select]}" > /tmp/BakFilename.tmp ; echo -e "\033[?25h" ; stty echo ； exit 0 ; elif [ $? = 2 ] ; then return ; fi 
   $app/Msgbox.sh "$xy" "解压文件"\
   "解压到当前目录 解压到家目录  解压到根目录 取消"
   case $? in
@@ -299,7 +301,7 @@ until [ "$quit" = 1 ] ; do
   ${#dir[@]} ) prog_msgbox_dirmenu ;;
   $((${#dir[@]}+1)) ) prog_click ;;
   $((${#dir[@]}+2)) ) df -h
-    echo -e "$inc按输入键继续...$end" ; read -s ;;
+    echo -e "$inc按回车键继续...$end" ; read -s ;;
   $((${#dir[@]}+3)) ) exit 1 ;;
   * )
     case "${style[select]}" in
