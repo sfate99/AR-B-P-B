@@ -2,7 +2,7 @@
 
 #文件位置
 #ctrlf="/opt/QtPalmtop/data/z/common/ctrl.dat" #按键数据
-ctrlf="$(dirname "$0")/../../data/z/common/term.dat"
+ctrlf="$(dirname "$0")/term.dat"
 outf="/tmp/ListSelect.tmp"
 
 #其它数据
