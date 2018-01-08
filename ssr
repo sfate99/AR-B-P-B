@@ -28,12 +28,28 @@ if [[ ${log_filesize} -ge ${log_max} ]];then
     sed -i -n '1,198N;$p;N;D' /usr/local/shadowsocksr/ssserver.log
 fi
 fi
+yiyan(){
+nowdate=$(date +%Y-%m-%d)
+if [[ ! -e /tmp/yiyan.tmp ]];then
+    echo "${nowdate}" > /tmp/yiyan.date
+    curl -L -s "https://sslapi.hitokoto.cn/?encode=text" >> /tmp/yiyan.tmp
+    tail -n 1 /tmp/yiyan.tmp
+else
+    if [[ ${nowdate} == $(cat /tmp/yiyan.date) ]];then
+        tail -n 1 /tmp/yiyan.tmp
+    else
+        echo "${nowdate}" > /tmp/yiyan.date
+        curl -L -s "https://sslapi.hitokoto.cn/?encode=text" >> /tmp/yiyan.tmp
+        tail -n 1 /tmp/yiyan.tmp
+    fi
+fi
+}
 
 echo
 echo "*******************"
 echo ""
-echo "欢迎使用 AR (Python Base) Beta
-"
+echo -e "欢迎使用 AR (Python Base) Beta\n"
+echo -e "$(yiyan)\n\n"
 echo "输入数字选择功能："
 echo ""
 echo "1.服务器控制"
