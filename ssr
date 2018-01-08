@@ -49,7 +49,7 @@ echo
 echo "*******************"
 echo ""
 echo -e "欢迎使用 AR (Python Base) Beta\n"
-echo -e "$(yiyan)\n\n"
+echo -e "每日一言：\033[32m$(yiyan)\033[0m\n"
 echo "输入数字选择功能："
 echo ""
 echo "1.服务器控制"
