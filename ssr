@@ -32,14 +32,14 @@ yiyan(){
 nowdate=$(date +%Y-%m-%d)
 if [[ ! -e /tmp/yiyan.tmp ]];then
     echo "${nowdate}" > /tmp/yiyan.date
-    echo -e "$(curl -L -s https://sslapi.hitokoto.cn/?encode=text)\n" >> /tmp/yiyan.tmp
+    echo -e "\n$(curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
     tail -n 1 /tmp/yiyan.tmp
 else
     if [[ ${nowdate} == $(cat /tmp/yiyan.date) ]];then
         tail -n 1 /tmp/yiyan.tmp
     else
         echo "${nowdate}" > /tmp/yiyan.date
-        echo -e "$(curl -L -s https://sslapi.hitokoto.cn/?encode=text)\n" >> /tmp/yiyan.tmp
+        echo -e "\n$(curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
         tail -n 1 /tmp/yiyan.tmp
     fi
 fi
