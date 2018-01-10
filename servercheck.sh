@@ -183,6 +183,7 @@ if [[ ! -e ${log_file} ]];then
 		read everytime
 		if [[ -z ${everytime} ]];then
 			everytime="30"
+			break
 		elif [[ ! ${everytime} =~ ^(-?|\+?)[0-9]+(\.?[0-9]+)?$ ]];then
 			echo "请输入正确的数字"
 		else
