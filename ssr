@@ -30,10 +30,10 @@ fi
 fi
 yiyan(){
 nowdate=$(date +%Y-%m-%d)
-if [[ ! -e /tmp/yiyan.tmp ]];then
+if [[ ! -e /tmp/yiyan.tmp || ! -e /tmp/yiyan.date ]];then
     echo "${nowdate}" > /tmp/yiyan.date
     #echo "$(curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
-    echo "$(curl -L -s --connect-timeout 3 https://us.fdos.me/yiyan/)" >> /tmp/yiyan.tmp
+    echo "$(curl -L -s --connect-timeout 3 https://us.fdos.me/yiyan/ || curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
     tail -n 1 /tmp/yiyan.tmp
 else
     if [[ ${nowdate} == $(cat /tmp/yiyan.date) ]];then
@@ -41,7 +41,7 @@ else
     else
         echo "${nowdate}" > /tmp/yiyan.date
         #echo "$(curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
-	echo "$(curl -L -s --connect-timeout 3 https://us.fdos.me/yiyan/)" >> /tmp/yiyan.tmp
+	echo "$(curl -L -s --connect-timeout 3 https://us.fdos.me/yiyan/ || curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
         tail -n 1 /tmp/yiyan.tmp
     fi
 fi
