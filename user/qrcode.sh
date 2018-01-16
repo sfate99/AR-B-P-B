@@ -55,6 +55,12 @@ readmsg(){
 	fi
 }
 
+cleanwebqr(){
+    sleep 120s
+    screen -S webqr -X quit
+    rm -rf /tmp/QR
+    iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport 8001 -j ACCEPT
+}
 checkqr
 if [[ $1 == "" ]];then
 	readmsg
@@ -89,6 +95,14 @@ qr --factory=pymaging "$ssrmsg" > $username.png
 if [[ -e "$username.png" ]];then
 	echo "链接信息：$ssrmsg"
 	echo "二维码生成成功!位于${HOME}/SSRQR/${username}.png"
+    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8001 -j ACCEPT
+    mkdir /tmp/QR
+    cp "${HOME}/SSRQR/${username}.png" /tmp/QR
+    cd /tmp/QR
+    myip=`curl -m 10 -s http://members.3322.org/dyndns/getip`
+    screen -dmS webqr python -m SimpleHTTPServer 8001
+    nohup cleanwebqr 2>/dev/null &
+    echo "请及时访问 http://${myip}:8001/${username}.png 来获取二维码,链接将在120后失效"
 else
 	echo "由于奇奇怪怪的原因，二维码未能成功生成"
 fi
