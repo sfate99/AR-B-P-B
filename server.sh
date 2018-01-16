@@ -282,6 +282,6 @@ if [[ $serverc == 10 ]];then
 fi	
 
 if [[ $serverc == 11 ]];then
-        bash /usr/local/SSR-Bash-Python/speed_test.sh
+    bash /usr/local/SSR-Bash-Python/ZBench-CN.sh
 	bash /usr/local/SSR-Bash-Python/server.sh
 fi

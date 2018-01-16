@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 
@@ -40,6 +40,8 @@ rand(){
     echo $(($num%$max+$min))  
 }
 
+source /usr/local/SSR-Bash-Python/easyadd.conf
+
 echo "你选择了添加用户"
 echo ""
 read -p "输入用户名： " uname
@@ -54,9 +56,6 @@ while :;do
 	fi
 done
 read -p "输入密码： " upass
-um1="none"
-ux1="auth_chain_a"
-uo1="tls1.2_ticket_auth"
 while :; do echo
 	read -p "输入流量限制(只需输入数字，单位：GB)： " ut
 	if [[ "$ut" =~ ^(-?|\+?)[0-9]+(\.?[0-9]+)?$ ]];then
@@ -65,8 +64,6 @@ while :; do echo
 	   echo 'Input Error!'
 	fi
 done
-iflimitspeed="y"
-us="2048"
 
 #Set Firewalls
 if [[ ${OS} =~ ^Ubuntu$|^Debian$ ]];then
