@@ -101,7 +101,7 @@ if [[ -e "$username.png" ]];then
     cd /tmp/QR
     myip=`curl -m 10 -s http://members.3322.org/dyndns/getip`
     screen -dmS webqr python -m SimpleHTTPServer 8001
-    nohup cleanwebqr 2>/dev/null &
+    cleanwebqr &
     echo "请及时访问 http://${myip}:8001/${username}.png 来获取二维码,链接将在120后失效"
 else
 	echo "由于奇奇怪怪的原因，二维码未能成功生成"
