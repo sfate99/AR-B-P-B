@@ -68,7 +68,8 @@ rand(){
     num=$(cat /dev/urandom | head -n 10 | cksum | awk -F ' ' '{print $1}')
     echo $(($num%$max+$min))
 }
-checkqr
+
+checkmsg(){
 if [[ $1 == "" ]];then
 	readmsg
 	if [[ $lsid == 1 ]];then
@@ -78,10 +79,6 @@ if [[ $1 == "" ]];then
 		ssrmsg=`python mujson_mgr.py -l -p $uid | tail -n 1 | sed 's/^[ \t]*//g'`
 		username=`python mujson_mgr.py -l -p $uid | head -n 2 | tail -n 1 | awk -F" : " '{ print $2 }'`
 	fi
-	if [[ "$ssrmsg" == "" ]];then
-		echo "该端口号或用户名不存在，请确认后输入!"
-		readmsg
-	fi
 elif [[ $1 == "u" ]];then
 	ssrmsg=`python mujson_mgr.py -l -u $2 | tail -n 1 | sed 's/^[ \t]*//g'`
 	username=`python mujson_mgr.py -l -u $2 | head -n 2 | tail -n 1 | awk -F" : " '{ print $2 }'`
@@ -89,7 +86,16 @@ elif [[ $1 == "p" ]];then
 	ssrmsg=`python mujson_mgr.py -l -p $2 | tail -n 1 | sed 's/^[ \t]*//g'`
 	username=`python mujson_mgr.py -l -p $2 | head -n 2 | tail -n 1 | awk -F" : " '{ print $2 }'`
 fi
-
+}
+checkqr
+while :;do
+    checkmsg 
+    if [[ -z ${username} || -z ${ssrmsg} ]];then
+        echo "该用户名或端口是无效的，请检查更改！"
+    else
+        break
+    fi
+done
 cd ~
 if [[ ! -d ./SSRQR ]];then
 	mkdir SSRQR
