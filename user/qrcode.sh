@@ -89,7 +89,7 @@ fi
 }
 checkqr
 while :;do
-    checkmsg 
+    checkmsg $1 $2
     if [[ -z ${username} || -z ${ssrmsg} ]];then
         echo "该用户名或端口是无效的，请检查更改！"
     else
