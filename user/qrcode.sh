@@ -57,9 +57,16 @@ readmsg(){
 
 cleanwebqr(){
     sleep 120s
-    screen -S webqr -X quit
-    rm -rf /tmp/QR
-    iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport 8001 -j ACCEPT
+    screen -S $1 -X quit
+    rm -rf /tmp/QR/$3
+    iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $2 -j ACCEPT
+}
+
+rand(){
+    min=$1
+    max=$(($2-$min+1))
+    num=$(cat /dev/urandom | head -n 10 | cksum | awk -F ' ' '{print $1}')
+    echo $(($num%$max+$min))
 }
 checkqr
 if [[ $1 == "" ]];then
@@ -92,17 +99,27 @@ if [[ -e $username.png ]];then
 	rm -f $username.png
 fi
 qr --factory=pymaging "$ssrmsg" > $username.png
+
+while :;do
+    cport=$(rand 1000 65535)
+    port=`netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq | grep "$cport"`
+    if [[ -z ${port} ]];then
+        break
+    fi
+done
+cname=$(cat /dev/urandom | tr -dc A-Za-z0-9_ | head -c6 | sed 's/[ \r\b ]//g')
+
 if [[ -e "$username.png" ]];then
 	echo "链接信息：$ssrmsg"
 	echo "二维码生成成功!位于${HOME}/SSRQR/${username}.png"
-    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 8001 -j ACCEPT
-    mkdir /tmp/QR
+    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${cport} -j ACCEPT
+    mkdir -p /tmp/QR/${username}
     cp "${HOME}/SSRQR/${username}.png" /tmp/QR
-    cd /tmp/QR
+    cd /tmp/QR/${username}
     myip=`curl -m 10 -s http://members.3322.org/dyndns/getip`
-    screen -dmS webqr python -m SimpleHTTPServer 8001
-    cleanwebqr &
-    echo "请及时访问 http://${myip}:8001/${username}.png 来获取二维码,链接将在120后失效"
+    screen -dmS ${cname} python -m SimpleHTTPServer ${cport}
+    cleanwebqr ${cname} ${cport} ${username} &
+    echo "请及时访问 http://${myip}:${cport}/${username}.png 来获取二维码,链接将在120后失效"
 else
 	echo "由于奇奇怪怪的原因，二维码未能成功生成"
 fi
