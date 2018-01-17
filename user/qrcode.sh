@@ -114,7 +114,7 @@ if [[ -e "$username.png" ]];then
 	echo "二维码生成成功!位于${HOME}/SSRQR/${username}.png"
     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${cport} -j ACCEPT
     mkdir -p /tmp/QR/${username}
-    cp "${HOME}/SSRQR/${username}.png" /tmp/QR
+    cp "${HOME}/SSRQR/${username}.png" /tmp/QR/${username}
     cd /tmp/QR/${username}
     myip=`curl -m 10 -s http://members.3322.org/dyndns/getip`
     screen -dmS ${cname} python -m SimpleHTTPServer ${cport}
