@@ -119,7 +119,7 @@ if [[ -e "$username.png" ]];then
     myip=`curl -m 10 -s http://members.3322.org/dyndns/getip`
     screen -dmS ${cname} python -m SimpleHTTPServer ${cport}
     cleanwebqr ${cname} ${cport} ${username} &
-    echo "请及时访问 http://${myip}:${cport}/${username}.png 来获取二维码,链接将在120后失效"
+    echo "请及时访问 http://${myip}:${cport}/${username}.png 来获取二维码,链接将在120秒后失效"
 else
 	echo "由于奇奇怪怪的原因，二维码未能成功生成"
 fi
