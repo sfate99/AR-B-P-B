@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 
@@ -52,21 +52,29 @@ while :;do
 		else
 			port=`netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq | grep "$uport"`
 			if [[ -z ${port} ]];then
-                for i in ${banport}
+                for i in `echo -e "${banport}"`
                 do
-                    if [[ ${i} == ${port} ]];then
+                    checkport=no
+                    if [[ ${i} == ${uport} ]];then
                         randsum=$(cat /dev/urandom | tr -dc A-Za-z0-9_ | head -c10 | sed 's/[ \r\b ]//g')
                         echo "请不要使用此脚本进行免流,这意味着您目前的操作通常是不被允许的！"
                         echo "若您确实需要使用此端口提供代理服务,请输入 ${randsum} 表示您将忽略该警告继续操作,否则请退出"
                         read -n 10 readsum
                         if [[ ${readsum} == ${randsum} ]];then
-                            sleep 2s
+                            checkport=yes
                             break
+                        else
+                            echo "输入错误,退出!"
+                            checkport=no
+                            exit 1
                         fi
                     else
-                        break
+                        checkport=yes
                     fi
                 done
+                if [[ ${checkport} == yes ]];then
+                    break
+                fi
 			else
 				echo "该端口号已存在，请更换!"
 			fi
