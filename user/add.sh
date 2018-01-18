@@ -33,6 +33,10 @@ fi
 #Check Root
 [ $(id -u) != "0" ] && { echo "Error: You must be root to run this script"; exit 1; }
 
+#Set banport
+banport="80
+8080
+443"
 
 echo "你选择了添加用户"
 echo ""
@@ -48,7 +52,21 @@ while :;do
 		else
 			port=`netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq | grep "$uport"`
 			if [[ -z ${port} ]];then
-				break
+                for i in ${banport}
+                do
+                    if [[ ${i} == ${port} ]];then
+                        randsum=$(cat /dev/urandom | tr -dc A-Za-z0-9_ | head -c10 | sed 's/[ \r\b ]//g')
+                        echo "请不要使用此脚本进行免流,这意味着您目前的操作通常是不被允许的！"
+                        echo "若您确实需要使用此端口提供代理服务,请输入 ${randsum} 表示您将忽略该警告继续操作,否则请退出"
+                        read -n 10 readsum
+                        if [[ ${readsum} == ${randsum} ]];then
+                            sleep 2s
+                            break
+                        fi
+                    else
+                        break
+                    fi
+                done
 			else
 				echo "该端口号已存在，请更换!"
 			fi
