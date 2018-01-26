@@ -305,7 +305,7 @@ if [[ ${iflimittime} == y ]]; then
 		limit="1m"
 	fi
 	bash /usr/local/SSR-Bash-Python/timelimit.sh a ${uport} ${limit}
-	datelimit=$(cat /usr/local/SSR-Bash-Python/timelimit.db | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+	datelimit=$(cat /usr/local/SSR-Bash-Python/timelimit.db | grep "${uport}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
 fi
 if [[ -z ${datelimit} ]]; then
 	datelimit="永久"
