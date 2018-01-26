@@ -74,6 +74,9 @@ backup(){
 	if [[ -e /usr/local/SSR-Bash-Python/check.log ]];then
 		cp /usr/local/SSR-Bash-Python/check.log ./
 	fi
+	if [[ -e /usr/local/SSR-Bash-Python/timelimit.db ]];then
+		cp /usr/local/SSR-Bash-Python/timelimit.db ./
+	fi
 	netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq >> ./port.conf
 	wf=`ls | wc -l`
 	if [[ $wf -ge 2 ]];then
@@ -117,6 +120,9 @@ if [[ "$sv" == "$solve" ]];then
 		tar -zxvf ${bakfile} -C ./
 		if [[ -e ./check.log ]];then
 			mv ./check.log /usr/local/SSR-Bash-Python/check.log
+		fi
+		if [[ -e /usr/local/SSR-Bash-Python/timelimit.db ]];then
+			mv ./timelimit.db /usr/local/SSR-Bash-Python/timelimit.db
 		fi
 		if [[ ${OS} =~ ^Ubuntu$|^Debian$ ]];then
 			iptables-restore < /etc/iptables.up.rules

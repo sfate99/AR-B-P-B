@@ -83,6 +83,8 @@ while :; do echo
 	if [[ ! $ec =~ ^[1-9]$ ]]; then
 		if [[ $ec == 10 ]]; then
 			break
+		elif [[ $ec == 11 ]]; then
+			break
 		fi
 		echo "输入错误! 请输入正确的数字!"
 	else
@@ -418,4 +420,8 @@ if [[ $ec == 10 ]];then
 		echo "端口号为 $uid 的允许的连接数已修改为 $uparam "
 		pqr
 	fi
+fi
+
+if [[ $ec == 11 ]];then
+	bash /usr/local/SSR-Bash-Python/timelimit.sh e
 fi

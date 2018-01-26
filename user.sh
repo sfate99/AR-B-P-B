@@ -40,6 +40,7 @@ echo '5.显示用户流量信息'
 echo '6.显示用户名端口信息'
 echo '7.查看端口用户连接状况'
 echo '8.生成用户二维码'
+echo '9.为已有帐号添加有效期'
 echo "直接回车返回上级菜单"
 
 while :; do echo
@@ -48,7 +49,7 @@ while :; do echo
                 ssr
                 break
         fi
-	if [[ ! $userc =~ ^[1-8]$ ]]; then
+	if [[ ! $userc =~ ^[1-9]$ ]]; then
 		echo "输入错误! 请输入正确的数字!"
 	else
 		break	
@@ -195,6 +196,11 @@ fi
 if [[ $userc == 8 ]];then
 	bash /usr/local/SSR-Bash-Python/user/qrcode.sh
 	echo ""
+	bash /usr/local/SSR-Bash-Python/user.sh
+fi
+
+if [[ $userc == 9 ]];then
+	bash /usr/local/SSR-Bash-Python/timelimit.sh a
 	bash /usr/local/SSR-Bash-Python/user.sh
 fi
 exit 0

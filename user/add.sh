@@ -290,7 +290,26 @@ if [[ $iflimitspeed == y ]]; then
 	done
 fi
 
+while :; do
+	read -p "是否需要限制帐号有效期(y/n): " iflimittime
+	if [[ ! ${iflimittime} =~ ^[y,n]$ ]]; then
+		echo "输入错误! 请输入y或者n!"
+	else
+		break
+	fi
+done
 
+if [[ ${iflimittime} == y ]]; then
+	read -p "请输入有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m): " limit
+	if [[ -z ${limit} ]];then
+		limit="1m"
+	fi
+	bash /usr/local/SSR-Bash-Python/timelimit.sh a ${uport} ${limit}
+	datelimit=$(cat /usr/local/SSR-Bash-Python/timelimit.db | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+fi
+if [[ -z ${datelimit} ]]; then
+	datelimit="永久"
+fi
 
 #Set Firewalls
 if [[ ${OS} =~ ^Ubuntu$|^Debian$ ]];then
@@ -356,6 +375,7 @@ echo "协议: $ux1"
 echo "混淆方式: $uo1"
 echo "流量: $ut GB"
 echo "允许连接数: $uparam"
+echo "帐号有效期: $datelimit"
 echo "===================="
 echo ""
 echo "是否需要为该用户生成二维码？（y/n）"
