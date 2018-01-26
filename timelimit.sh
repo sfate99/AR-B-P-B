@@ -18,7 +18,8 @@ checkonly(){
 				port=$(echo ${line} | awk -F':' '{ print $1 }')
 				limitdate=$(echo ${line} | awk -F':' '{ print $2 }')
 				if [[ ${nowdate} -ge ${limitdate} ]];then
-					python /usr/local/shadowsocksr/mujson_mgr.py -d -p ${port} 1>/dev/null 2>&1
+				cd /usr/local/shadowsocksr/
+					python mujson_mgr.py -d -p ${port} 1>/dev/null 2>&1
 					sed -i '/'"${line}"'/d' ${userlimit}
 				fi
 			fi
