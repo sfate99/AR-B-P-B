@@ -64,7 +64,13 @@ while :; do echo
 	   echo 'Input Error!'
 	fi
 done
-
+if [[ ${iflimittime} == y ]]; then
+	bash /usr/local/SSR-Bash-Python/timelimit.sh a ${uport} ${limit}
+	datelimit=$(cat /usr/local/SSR-Bash-Python/timelimit.db | grep "${uport}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+fi
+if [[ -z ${datelimit} ]]; then
+	datelimit="永久"
+fi
 #Set Firewalls
 if [[ ${OS} =~ ^Ubuntu$|^Debian$ ]];then
 	iptables-restore < /etc/iptables.up.rules
@@ -119,4 +125,5 @@ echo "协议: $ux1"
 echo "混淆方式: $uo1"
 echo "流量: $ut GB"
 echo "允许连接数: 不限"
+echo "帐号有效期: $datelimit"
 echo "===================="
