@@ -50,7 +50,6 @@ Add(){
 	else
 		Edit
 	fi
-
 }
 
 Edit(){
@@ -160,6 +159,27 @@ EasyEdit(){
 	fi
 }
 
+readme(){
+	echo "Usage: $0 params [port] [expiration time]"
+	echo "params can be one or more of the following :"
+	echo "    a | A    : Add a time limit for a user."
+	echo "    e | E    : Modify a user's time limit."
+	echo "If you do not add any parameters after the first parameter,you will enter a simple interface to operate."
+	echo ""
+	echo 'About the second parameter "port" :'
+	echo "    As the unique identifier of a user,the port number is unique and the script determines the user's basis.So when you add an account with the same port number,the script will overwrite the original record without any hint."
+	echo ""
+	echo 'About the third parameter "expiration time" :'
+	echo '    Account expiration date refers to the period from the current date.This is true whether it is added or modified.The format is "number+unit".For example,one month is "1m",one day is "1d" and one hour is "1h".'
+	echo ""
+	echo "Note: This script does not interact with other scripts.When you add traffic to a user, the script will still be deleted as before."
+	echo ""
+	echo "e.g.: "
+	echo "bash ./timelimit.sh a 443 1m      #You will add a month's validity to a user with a port number of 443."
+	echo ""
+	echo "If you find a bug, send it to 'stackzhao@gmail.com'"
+}
+
 #Main
 case ${param[0]} in
 	a|A)
@@ -180,6 +200,6 @@ case ${param[0]} in
  		checkonly
  		;;
  	*)
- 		echo "错误的参数值!"
+ 		readme
  		;;
  esac
