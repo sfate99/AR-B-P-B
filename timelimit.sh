@@ -42,6 +42,8 @@ Add(){
 		elif [[ ${param[2]} == *h ]];then
 			timing=$(echo ${param[2]} | sed 's\h\\g')
 			dating=$(date +%Y%m%d%H%M --date="+${timing}hour")
+		elif [[ ${param[2]} == "a" ]];then
+			exit 0
 		else
 			echo "错误的参数属性值"
 			exit 1
@@ -85,12 +87,17 @@ EasyAdd(){
 			echo "用户名不存在！"
 			EasyAdd
 		else
-			read -p "请输入有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m): " limit
+			read -p "请输入有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m){默认：一个月[1m]}: " limit
 			if [[ -z ${limit} ]];then
 				limit="1m"
 			fi
 			port=$(python mujson_mgr.py -l -u ${uid} | grep "port :" | awk -F" : " '{ print $2 }')
 			bash /usr/local/SSR-Bash-Python/timelimit.sh a ${port} ${limit} || EasyAdd
+			datelimit=$(cat ${userlimit} | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+			if [[ -z ${datelimit} ]];then
+				datelimit="永久"
+			fi
+			echo -e "添加成功!当前用户端口号：${port},有效期至：${datelimit}\n"
 		fi
 	fi
 	if [[ ${lsid} == 2 ]];then
@@ -101,11 +108,16 @@ EasyAdd(){
 			echo "用户不存在!"
 			EasyAdd
 		else
-			read -p "请输入有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m): " limit
+			read -p "请输入有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m){默认：一个月[1m]}: " limit
 			if [[ -z ${limit} ]];then
 				limit="1m"
 			fi
 			bash /usr/local/SSR-Bash-Python/timelimit.sh a ${port} ${limit} || EasyAdd
+			datelimit=$(cat ${userlimit} | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+			if [[ -z ${datelimit} ]];then
+				datelimit="永久"
+			fi
+			echo -e "添加成功!当前用户端口号：${port},有效期至：${datelimit}\n"
 		fi
 	fi
 }
@@ -132,31 +144,41 @@ EasyEdit(){
 		else
 			port=$(python mujson_mgr.py -l -u ${uid} | grep "port :" | awk -F" : " '{ print $2 }')
 			datelimit=$(cat ${userlimit} | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
-			echo -e "当前用户端口号：${port},有效期至：${datelimit}\n"
-			read -p "请输入新的有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m): " limit
-			if [[ -z ${limit} ]];then
-				limit="1m"
+			if [[ -z ${datelimit} ]];then
+				datelimit="永久"
 			fi
-			bash /usr/local/SSR-Bash-Python/timelimit.sh e ${port} ${limit} || EasyEdit
+			echo -e "当前用户端口号：${port},有效期至：${datelimit}\n"
+			read -p "请输入新的有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m){默认：永久[a]}: " limit
+			if [[ -z ${limit} ]];then
+				limit="a"
+			fi
 		fi
 	fi
 	if [[ ${lsid} == 2 ]];then
 		read -p "输入端口号： " port
 		cd /usr/local/shadowsocksr
-		checkuid=$(python mujson_mgr.py -l -p ${port})
+		checkuid=$(python mujson_mgr.py -l -p ${port} 2>/dev/null)
 		if [[ -z ${checkuid} ]];then
 			echo "用户不存在!"
 			EasyEdit
 		else
 			datelimit=$(cat ${userlimit} | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
-			echo -e "当前用户端口号：${port},有效期至：${datelimit}\n"
-			read -p "请输入新的有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m): " limit
-			if [[ -z ${limit} ]];then
-				limit="1m"
+			if [[ -z ${datelimit} ]];then
+				datelimit="永久"
 			fi
-			bash /usr/local/SSR-Bash-Python/timelimit.sh e ${port} ${limit} || EasyEdit
+			echo -e "当前用户端口号：${port},有效期至：${datelimit}\n"
+			read -p "请输入新的有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m){默认：永久[a]}: " limit
+			if [[ -z ${limit} ]];then
+				limit="a"
+			fi
 		fi
 	fi
+	bash /usr/local/SSR-Bash-Python/timelimit.sh e ${port} ${limit} || EasyEdit
+	datelimit=$(cat ${userlimit} | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+	if [[ -z ${datelimit} ]];then
+		datelimit="永久"
+	fi
+	echo -e "修改成功!当前用户端口号：${port},新的有效期至：${datelimit}\n"
 }
 
 readme(){
@@ -202,4 +224,5 @@ case ${param[0]} in
  	*)
  		readme
  		;;
- esac
+esac
+exit 0

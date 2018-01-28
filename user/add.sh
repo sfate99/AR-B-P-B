@@ -300,7 +300,7 @@ while :; do
 done
 
 if [[ ${iflimittime} == y ]]; then
-	read -p "请输入有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m): " limit
+	read -p "请输入有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m){默认：一个月}: " limit
 	if [[ -z ${limit} ]];then
 		limit="1m"
 	fi

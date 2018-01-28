@@ -59,12 +59,24 @@ done
 if [[ $lsid == 1 ]];then
 	read -p "输入用户名： " uid
 	cd /usr/local/shadowsocksr
-	python mujson_mgr.py -l -u $uid
+	checkuid=$(python mujson_mgr.py -l -u $uid 2>/dev/null)
+	if [[ -z ${checkuid} ]];then
+		echo "用户不存在！"
+		bash /usr/local/SSR-Bash-Python/edit.sh || exit 0
+	else
+		python mujson_mgr.py -l -u $uid
+	fi
 fi
 if [[ $lsid == 2 ]];then
 	read -p "输入端口号： " uid
 	cd /usr/local/shadowsocksr
-	python mujson_mgr.py -l -p $uid
+	checkuid=$(python mujson_mgr.py -l -p $uid 2>/dev/null)
+	if [[ -z ${checkuid} ]];then
+		echo "用户不存在！"
+		bash /usr/local/SSR-Bash-Python/edit.sh || exit 0
+	else
+		python mujson_mgr.py -l -p $uid
+	fi
 fi
 
 echo "1.修改密码"
@@ -77,6 +89,7 @@ echo "7.修改流量"
 echo "8.修改端口限制"
 echo "9.修改总端口限速"
 echo "10.修改连接数限制"
+echo "11.修改时限"
 
 while :; do echo
 	read -p "请选择： " ec
@@ -423,5 +436,36 @@ if [[ $ec == 10 ]];then
 fi
 
 if [[ $ec == 11 ]];then
-	bash /usr/local/SSR-Bash-Python/timelimit.sh e
+	userlimit="/usr/local/SSR-Bash-Python/timelimit.db"
+	if [[ ${lsid} == 1 ]];then
+		port=$(python mujson_mgr.py -l -u ${uid} | grep "port :" | awk -F" : " '{ print $2 }')
+		datelimit=$(cat ${userlimit} | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+		if [[ -z ${datelimit} ]];then
+			datelimit="永久"
+		fi
+		echo -e "当前用户端口号：${port},有效期至：${datelimit}\n"
+		read -p "请输入新的有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m){默认：永久[a]}: " limit
+		if [[ -z ${limit} ]];then
+			limit="a"
+		fi
+		bash /usr/local/SSR-Bash-Python/timelimit.sh e ${port} ${limit} 
+	fi
+	if [[ ${lsid} == 2 ]];then
+		datelimit=$(cat ${userlimit} | grep "${uid}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+		if [[ -z ${datelimit} ]];then
+			datelimit="永久"
+		fi
+		echo -e "当前用户端口号：${uid},有效期至：${datelimit}\n"
+		read -p "请输入新的有效期(单位：月[m]日[d]小时[h],例如：1个月就输入1m){默认：永久[a]}: " limit
+		if [[ -z ${limit} ]];then
+			limit="a"
+		fi
+		bash /usr/local/SSR-Bash-Python/timelimit.sh e ${uid} ${limit}
+		port=${uid}
+	fi
+	datelimit=$(cat ${userlimit} | grep "${port}:" | awk -F":" '{ print $2 }' | sed 's/\([0-9]\{4\}\)\([0-9]\{2\}\)\([0-9}\{2\}\)\([0-9]\{2\}\)\([0-9]\{2\}\)/\1年\2月\3日 \4:/')
+	if [[ -z ${datelimit} ]];then
+		datelimit="永久"
+	fi
+	echo -e "修改成功!当前用户端口号：${port},新的有效期至：${datelimit}\n"
 fi
