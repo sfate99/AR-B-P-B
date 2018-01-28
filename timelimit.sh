@@ -57,8 +57,7 @@ Add(){
 Edit(){
 	checkuser=$(grep -i "${param[1]}:" ${userlimit})
 	if [[ -z ${checkuser} ]];then
-		echo "用户不存在!"
-		exit 2
+		Add
 	else
 		limitdate=$(echo ${checkuser} | awk -F':' '{ print $2 }')
 		edit="yes"
