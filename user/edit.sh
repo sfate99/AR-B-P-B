@@ -42,7 +42,7 @@ pqr(){
 		bash /usr/local/SSR-Bash-Python/user/qrcode.sh p $uid
 	fi
 }
-echo "1.使用用户名"
+echo -e "\n1.使用用户名"
 echo "2.使用端口"
 echo ""
 while :; do echo
@@ -79,7 +79,7 @@ if [[ $lsid == 2 ]];then
 	fi
 fi
 
-echo "1.修改密码"
+echo -e "\n1.修改密码"
 echo "2.修改加密"
 echo "3.修改协议"
 echo "4.修改混淆"
@@ -498,5 +498,6 @@ if [[ $ec == 12 ]];then
 	done
 	cd /usr/local/shadowsocksr
 	sed -i 's/"port": '"${port}"'/"port": '"${newport}"'/g' mudb.json
-	echo "端口号修改成功！"
+	echo -e "端口号修改成功！\n"
 fi
+exit 0
