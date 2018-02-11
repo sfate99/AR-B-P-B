@@ -90,6 +90,7 @@ echo "8.修改端口限制"
 echo "9.修改总端口限速"
 echo "10.修改连接数限制"
 echo "11.修改时限"
+echo "12.修改端口号"
 
 while :; do echo
 	read -p "请选择： " ec
@@ -97,6 +98,8 @@ while :; do echo
 		if [[ $ec == 10 ]]; then
 			break
 		elif [[ $ec == 11 ]]; then
+			break
+		elif [[ $ec == 12 ]]; then
 			break
 		fi
 		echo "输入错误! 请输入正确的数字!"
@@ -468,4 +471,32 @@ if [[ $ec == 11 ]];then
 		datelimit="永久"
 	fi
 	echo -e "修改成功!当前用户端口号：${port},新的有效期至：${datelimit}\n"
+fi
+
+if [[ $rc == 12 ]];then
+	if [[ ${lsid} == 1 ]];then
+		port=$(python mujson_mgr.py -l -u ${uid} | grep "port :" | awk -F" : " '{ print $2 }')
+	else
+		port=${uid}
+	fi
+	while :;do
+		read -p "请输入新的端口号：" newport
+		if [[ "$newport" =~ ^(-?|\+?)[0-9]+(\.?[0-9]+)?$ ]];then
+			if [[ $newport -ge "65535" ]];then
+				echo "端口范围取值[0,65535]"
+			else
+				checkport=$(netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq | grep "$newport")
+				if [[ -z ${checkport} ]];then
+					break
+				else
+					echo "端口号已存在，请更换！"
+				fi
+			fi
+		else
+			echo "请输入数字！"
+		fi
+	done
+	cd /usr/local/shadowsocksr
+	sed -i 's/"port": '"${port}"'/"port": '"${newport}"'/g' mudb.json
+	echo "端口号修改成功！"
 fi
