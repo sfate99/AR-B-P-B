@@ -62,7 +62,7 @@ if [[ $lsid == 1 ]];then
 	checkuid=$(python mujson_mgr.py -l -u $uid 2>/dev/null)
 	if [[ -z ${checkuid} ]];then
 		echo "用户不存在！"
-		bash /usr/local/SSR-Bash-Python/edit.sh || exit 0
+		bash /usr/local/SSR-Bash-Python/user/edit.sh || exit 0
 	else
 		python mujson_mgr.py -l -u $uid
 	fi
@@ -73,7 +73,7 @@ if [[ $lsid == 2 ]];then
 	checkuid=$(python mujson_mgr.py -l -p $uid 2>/dev/null)
 	if [[ -z ${checkuid} ]];then
 		echo "用户不存在！"
-		bash /usr/local/SSR-Bash-Python/edit.sh || exit 0
+		bash /usr/local/SSR-Bash-Python/user/edit.sh || exit 0
 	else
 		python mujson_mgr.py -l -p $uid
 	fi
@@ -473,7 +473,7 @@ if [[ $ec == 11 ]];then
 	echo -e "修改成功!当前用户端口号：${port},新的有效期至：${datelimit}\n"
 fi
 
-if [[ $rc == 12 ]];then
+if [[ $ec == 12 ]];then
 	if [[ ${lsid} == 1 ]];then
 		port=$(python mujson_mgr.py -l -u ${uid} | grep "port :" | awk -F" : " '{ print $2 }')
 	else
