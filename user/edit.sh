@@ -482,8 +482,12 @@ if [[ $ec == 12 ]];then
 	while :;do
 		read -p "请输入新的端口号：" newport
 		if [[ "$newport" =~ ^(-?|\+?)[0-9]+(\.?[0-9]+)?$ ]];then
-			if [[ $newport -ge "65535" ]];then
-				echo "端口范围取值[0,65535]"
+			if [[ ${newport} == ${port} ]];then
+				echo -e "新端口号与原端口号一致，无法被更改，退出！\n"
+				exit 0
+			fi
+			if [[ $newport -ge "65535" || $newport -le "1" ]];then
+				echo "端口范围取值[1,65535]"
 			else
 				checkport=$(netstat -anlt | awk '{print $4}' | sed -e '1,2d' | awk -F : '{print $NF}' | sort -n | uniq | grep "$newport")
 				if [[ -z ${checkport} ]];then
@@ -498,6 +502,34 @@ if [[ $ec == 12 ]];then
 	done
 	cd /usr/local/shadowsocksr
 	sed -i 's/"port": '"${port}"'/"port": '"${newport}"'/g' mudb.json
+	if [[ ${OS} =~ ^Ubuntu$|^Debian$ ]];then
+		iptables-restore < /etc/iptables.up.rules
+		iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $newport -j ACCEPT
+		iptables -I INPUT -m state --state NEW -m udp -p udp --dport $newport -j ACCEPT
+		iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $port -j ACCEPT
+		iptables -D INPUT -m state --state NEW -m udp -p udp --dport $port -j ACCEPT
+		iptables-save > /etc/iptables.up.rules
+	fi
+
+	if [[ ${OS} == CentOS ]];then
+		if [[ $CentOS_RHEL_version == 7 ]];then
+			iptables-restore < /etc/iptables.up.rules
+			iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $newport -j ACCEPT
+    		iptables -I INPUT -m state --state NEW -m udp -p udp --dport $newport -j ACCEPT
+    		iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $port -j ACCEPT
+			iptables -D INPUT -m state --state NEW -m udp -p udp --dport $port -j ACCEPT
+			iptables-save > /etc/iptables.up.rules
+		else
+			iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport $newport -j ACCEPT
+    		iptables -I INPUT -m state --state NEW -m udp -p udp --dport $newport -j ACCEPT
+    		iptables -D INPUT -m state --state NEW -m tcp -p tcp --dport $port -j ACCEPT
+			iptables -D INPUT -m state --state NEW -m udp -p udp --dport $port -j ACCEPT
+			/etc/init.d/iptables save
+			/etc/init.d/iptables restart
+		fi
+	fi
+	uid=${newport}
+	pqr
 	echo -e "端口号修改成功！\n"
 fi
 exit 0

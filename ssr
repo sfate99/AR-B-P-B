@@ -41,7 +41,7 @@ else
     else
         echo "${nowdate}" > /tmp/yiyan.date
         #echo "$(curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
-	echo "$(curl -L -s --connect-timeout 3 https://us.fdos.me/yiyan/ || curl -L -s https://sslapi.hitokoto.cn/?encode=text)" >> /tmp/yiyan.tmp
+	echo "$(curl -L -s --connect-timeout 3 https://us.fdos.me/yiyan/ || curl -L -s --connect-timeout 3 https://sslapi.hitokoto.cn/?encode=text || echo '无法连接到远程数据库!')" >> /tmp/yiyan.tmp
         tail -n 1 /tmp/yiyan.tmp
     fi
 fi

@@ -130,9 +130,17 @@ if [[ $userc == 7 ]];then
 		else
 			n=$(netstat -ntu | grep :${uid} | grep  "ESTABLISHED" | awk '{print $5}' | cut -d : -f 1 | sort -u | wc -l)
 			echo -e "当前端口号 \e[41;37m${uid}\e[0m 共有 \e[42;37m${n}\e[0m 位用户连接"
+			i=1
 			for ips in `netstat -ntu | grep :${uid} | grep  "ESTABLISHED" | awk '{print $5}' | cut -d : -f 1 | sort -u`
 			do
+				if [[ $i -ge 3 ]];then
+					sleep 1s
+				fi
+				if [[ $i -ge 5 ]];then
+					sleep 2s
+				fi
 				curl ip.cn/${ips}
+				i=$((i+1))
 			done
 			echo "你可以输入IP地址，将其加入黑名单，这将不能撤销（按回车键返回）"
 			while : 
