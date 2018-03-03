@@ -184,13 +184,14 @@ while :; do echo
 done
 
 if [[ $choice == 1 ]];then
-	updateme
+        #updateme
+        echo "脚本已停更并不再提供更新！"
 fi
 if [[ $choice == 2 ]];then
 	echo "切换到普通版之后你将无法使用一些功能"
 	sumdc
 	if [[ "$sv" == "$solve" ]];then
-		wget -q -N --no-check-certificate https://raw.githubusercontent.com/Readour/AR-B-P-B/master/install.sh && bash install.sh
+		bash /usr/local/SSR-Bash-Python/install.sh
 		sleep 3s
 		clear
 		ssr || exit 0
@@ -206,7 +207,7 @@ if [[ $choice == 4 ]];then
 	echo "你在做什么？你真的这么狠心吗？"
 	sumdc
 	if [[ "$sv" == "$solve" ]];then
-		wget -q -N --no-check-certificate https://raw.githubusercontent.com/Readour/AR-B-P-B/master/install.sh && bash install.sh uninstall
+		bash /usr/local/SSR-Bash-Python/install.sh uninstall
 		exit 0
 	else
 		echo "计算错误，正确结果为$solve"
