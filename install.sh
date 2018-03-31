@@ -59,6 +59,13 @@ StopInstall(){
         systemctl disable iptables.service
         systemctl enable firewalld.service
     fi
+    checkcron=$(crontab -l 2>/dev/null | grep "timelimit.sh")
+    if [[ ! -z ${checkcron} ]];then
+        crontab -l > ~/crontab.bak 1>/dev/null 2>&1
+        sed -i "/timelimit.sh/d" ~/crontab.bak 1>/dev/null 2>&1
+        crontab ~/crontab.bak 1>/dev/null 2>&1
+        rm -rf ~/crontab.bak
+    fi
     rm -rf $0
     echo "清理完成!"
 }
@@ -82,23 +89,29 @@ if [[ ${OS} == Ubuntu ]];then
 	apt-get install git -y
 	apt-get install language-pack-zh-hans -y
 	apt-get -y install vnstat bc
+    apt-get -y install net-tools
     apt-get install build-essential screen curl -y
+    apt-get install cron -y
 fi
 if [[ ${OS} == CentOS ]];then
 	yum install python screen curl -y
 	yum install python-setuptools -y && easy_install pip -y
 	yum install git -y
 	yum install bc -y
-	yum install vnstat
+	yum install vnstat -y
+	yum install net-tools -y
     yum groupinstall "Development Tools" -y
+    yum install vixie-cron crontabs -y
 fi
 if [[ ${OS} == Debian ]];then
 	apt-get update
 	apt-get install python screen curl -y
 	apt-get install python-pip -y
 	apt-get install git -y
+	apt-get -y install net-tools
 	apt-get -y install bc vnstat
     apt-get install build-essential -y
+    apt-get install cron -y
 fi
 if [[ $? != 0 ]];then
     echo "安装失败，请稍候重试！"
@@ -113,7 +126,7 @@ elif [[ -e ${libsodiumfileb} ]];then
     echo "libsodium已安装!"
 else
     cd $workdir
-    export LIBSODIUM_VER=1.0.15
+    export LIBSODIUM_VER=1.0.16
     wget -q https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VER}/libsodium-$LIBSODIUM_VER.tar.gz
     tar xvf libsodium-$LIBSODIUM_VER.tar.gz
     pushd libsodium-$LIBSODIUM_VER
@@ -128,7 +141,7 @@ else
 #    fi
 fi
 cd /usr/local
-git clone https://github.com/Readour/shadowsocksr.git
+git clone https://git.fdos.me/stack/shadowsocksr.git
 cd ./shadowsocksr
 git checkout manyuser
 git pull
@@ -150,19 +163,25 @@ if [ -e /usr/local/bin/ssr ];then
 		rm -rf /usr/local/shadowsocksr
 		echo "删除:${PWD}/install.sh"
 		rm -f ${PWD}/install.sh
+        echo "清理杂项!"
+        crontab -l > ~/crontab.bak 1>/dev/null 2>&1
+        sed -i "/timelimit.sh/d" ~/crontab.bak 1>/dev/null 2>&1
+        crontab ~/crontab.bak 1>/dev/null 2>&1
+        rm -rf ~/crontab.bak
 		sleep 1s
 		echo "卸载完成!!"
 		exit 0
 	fi
     if [[ ! $yn == n ]];then
-        echo "你是否为其它版本迁移而来？（Y/N）"
-        read -t 2 -n 1 yn
+        if [[ ! -e /usr/local/SSR-Bash-Python/version.txt ]];then
+        	yn="y"
+        fi
     fi
     if [[ ${yn} == [yY] ]];then
         mv /usr/local/shadowsocksr/mudb.json /usr/local/mudb.json
         rm -rf /usr/local/shadowsocksr
         cd /usr/local
-        git clone https://github.com/Readour/shadowsocksr.git
+        git clone https://git.fdos.me/stack/shadowsocksr.git
         if [[ $1 == develop ]];then
             cd ./shadowsocksr
             git checkout stack/dev
@@ -190,7 +209,7 @@ if [[ -d /usr/local/SSR-Bash-Python ]];then
     if [[ $yn == [yY] ]];then
         rm -rf /usr/local/SSR-Bash-Python
         cd /usr/local
-        git clone https://github.com/Readour/AR-B-P-B.git
+        git clone https://git.fdos.me/stack/AR-B-P-B.git
         mv AR-B-P-B SSR-Bash-Python
     fi
     cd /usr/local/SSR-Bash-Python
@@ -202,7 +221,7 @@ if [[ -d /usr/local/SSR-Bash-Python ]];then
     fi
 else
     cd /usr/local
-    git clone https://github.com/Readour/AR-B-P-B.git
+    git clone https://git.fdos.me/stack/AR-B-P-B.git
     cd AR-B-P-B
     git checkout master
     if [[ $1 == "develop" ]];then
@@ -210,6 +229,7 @@ else
     fi
     cd ..
     mv AR-B-P-B SSR-Bash-Python
+    bashinstall="no"
 fi
 cd /usr/local/shadowsocksr
 bash initcfg.sh
@@ -221,7 +241,7 @@ if [[ ! -e /usr/bin/bc ]];then
 		apt-get install bc -y
 	fi
 fi
-if [[ ! -e /usr/local/bin/ssr ]]; then
+if [[ ${bashinstall} == "no" ]]; then
 
 #Start when boot
 if [[ ${OS} == Ubuntu || ${OS} == Debian ]];then
@@ -261,6 +281,7 @@ fi
 if [[ ${OS} == CentOS && $CentOS_RHEL_version == 7 ]];then
     systemctl stop firewalld.service
     yum install iptables-services -y
+    sshport=$(netstat -nlp | grep sshd | awk '{print $4}' | awk -F : '{print $NF}' | sort -n | uniq)
     cat << EOF > /etc/sysconfig/iptables
 # sample configuration for iptables service
 # you can edit this manually or use system-config-firewall
@@ -272,7 +293,7 @@ if [[ ${OS} == CentOS && $CentOS_RHEL_version == 7 ]];then
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 -A INPUT -p icmp -j ACCEPT
 -A INPUT -i lo -j ACCEPT
--A INPUT -p tcp -m state --state NEW -m tcp --dport 22 -j ACCEPT
+-A INPUT -p tcp -m state --state NEW -m tcp --dport ${sshport} -j ACCEPT
 -A INPUT -m state --state NEW -m tcp -p tcp --dport 80 -j ACCEPT
 -A INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
 -A INPUT -j REJECT --reject-with icmp-host-prohibited
@@ -286,17 +307,18 @@ fi
 fi
 #Install SSR-Bash Background
 if [[ $1 == "develop" ]];then
-	wget -q -N --no-check-certificate -O /usr/local/bin/ssr https://raw.githubusercontent.com/readour/AR-B-P-B/develop/ssr
+	wget -q -N --no-check-certificate -O /usr/local/bin/ssr https://git.fdos.me/stack/AR-B-P-B/raw/master/ssr
 	chmod +x /usr/local/bin/ssr
 else
-	wget -q -N --no-check-certificate -O /usr/local/bin/ssr https://raw.githubusercontent.com/readour/AR-B-P-B/master/ssr
+	wget -q -N --no-check-certificate -O /usr/local/bin/ssr https://git.fdos.me/stack/AR-B-P-B/raw/master/ssr
 	chmod +x /usr/local/bin/ssr
 fi
 
 #Modify ShadowsocksR API
+nowip=$(grep -E -o "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)" /usr/local/shadowsocksr/userapiconfig.py)
 sed -i "s/sspanelv2/mudbjson/g" /usr/local/shadowsocksr/userapiconfig.py
 sed -i "s/UPDATE_TIME = 60/UPDATE_TIME = 10/g" /usr/local/shadowsocksr/userapiconfig.py
-sed -i "s/SERVER_PUB_ADDR = '127.0.0.1'/SERVER_PUB_ADDR = '$(wget -qO- -t1 -T2 ipinfo.io/ip)'/" /usr/local/shadowsocksr/userapiconfig.py
+sed -i "s/SERVER_PUB_ADDR = '${nowip}'/SERVER_PUB_ADDR = '$(wget -qO- -t1 -T2 ipinfo.io/ip)'/" /usr/local/shadowsocksr/userapiconfig.py
 #INstall Success
 read -t 20 -p "输入与您主机绑定的域名(请在20秒内输入，超时将跳过本步骤.默认填入本机IP): " ipname
 if [[ -z ${ipname} ]];then
@@ -328,6 +350,14 @@ if [[ $1 == develop ]];then
         else
         	echo "你居然拒绝了T.T"
         fi
+    fi
+    checkcron=$(crontab -l 2>/dev/null | grep "timelimit.sh")
+    if [[ -z ${checkcron} ]];then
+        crontab -l > ~/crontab.bak 1>/dev/null 2>&1
+        sed -i "/timelimit.sh/d" ~/crontab.tmp 1>/dev/null 2>&1
+        echo -e "\n*/5 * * * * /bin/bash /usr/local/SSR-Bash-Python/timelimit.sh c" >> ~/crontab.bak
+        crontab ~/crontab.bak
+        rm -r ~/crontab.bak 
     fi
 fi
 if [[ -e /etc/sysconfig/iptables-config ]];then
