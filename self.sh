@@ -37,7 +37,7 @@ updateme(){
 	if [[ -e ~/version.txt ]];then
 		rm -f ~/version.txt
 	fi
-	wget -q https://raw.githubusercontent.com/Readour/AR-B-P-B/develop/version.txt
+	wget -q https://git.fdos.me/stack/AR-B-P-B/raw/develop/version.txt
 	version1=`cat ~/version.txt`
 	version2=`cat /usr/local/SSR-Bash-Python/version.txt`
 	if [[ "$version1" == "$version2" ]];then
@@ -184,8 +184,7 @@ while :; do echo
 done
 
 if [[ $choice == 1 ]];then
-        #updateme
-        echo "脚本已停更并不再提供更新！"
+        updateme
 fi
 if [[ $choice == 2 ]];then
 	echo "切换到普通版之后你将无法使用一些功能"
